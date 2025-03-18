@@ -79,6 +79,23 @@ MoverCursor("direita", 5) ; Move 5 passos para a direita
 MoverCursor("esquerda", 3) ; Move 3 passos para a esquerda
 
 
+; Função para verificar o número no banco de dados
+VerificarNumero(número) {
+
+    ; Executa o script Python e captura a saída
+    RunWait, python "sqliteHandler.py" "%numero%", , Hide, OutputVar
+
+;    if (OutputVar = "encontrado") {
+        MsgBox, OutputVar
+ ;   } else {
+  ;      MsgBox, Número novo! Prosseguir com a ligação.
+   ; }
+}
+
+; Atalho para acionar o script (exemplo: Ctrl + Alt + V)
+^!v::VerificarNumero()
+
+
 F1::
 ; Salvar a linha inteira
 Send, {Right}
