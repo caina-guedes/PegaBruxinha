@@ -27,7 +27,8 @@ def normalizar_data(data_str, modo):
         "%B %d, %Y %H:%M:%S",      # March 09, 2024 15:30:45 (inglês completo)
     ]
     data_str = data_str.strip() # remove espaços no início e no fim
-    
+    if not data_str:
+        return False
     for formato in formatos:
         try:
             data = datetime.strptime(data_str, formato)

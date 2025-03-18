@@ -1,0 +1,106 @@
+prefixoCMDSalvarLinha := "python3 sqliteHandler.py salvar_linha "
+
+
+GetDataHoje()
+{
+    ; Acessa a data atual no formato YYYYMMDD
+    dataAtual := A_Now
+
+    ; Formata a data para o formato YYYY-MM-DD
+    dataFormatada := SubStr(dataAtual, 1, 4) . "-" . SubStr(dataAtual, 5, 2) . "-" . SubStr(dataAtual, 7, 2)
+
+    ; Retorna a data formatada
+    return dataFormatada
+}
+
+; Exemplo de chamada da função
+;data := GetDataHoje()
+;MsgBox, A data de hoje é: %data%
+
+GetClipboardContent()
+{
+    Send, ^c
+    Sleep, 100
+    clipboardContent := Clipboard
+    clipboardContent := "'" clipboardContent "'"
+    return clipboardContent
+}
+
+; Função principal para pegar os 9 valores e adicionar em um "array"
+PegarValores() {
+    valores := []
+    Loop, 9 {
+        valor := GetDataHoje()
+        valores.Push(valor)
+        Sleep, 500
+    }
+    return valores
+}
+
+;valoresArray := PegarValores()
+
+
+ArrayToString(array, prefix := '') {
+    result := prefix . " " 
+    for index, value in array {
+        ; Adiciona o valor à string, seguido de um espaço
+        result .= value . " "
+    }
+    return result
+}
+
+;valoresString := ArrayToString(valoresArray, prefixo)
+
+; Exibe a string
+;MsgBox, % valoresString
+
+; Função para enviar os comandos "Send, {Right}" ou "Send, {Left}" a quantidade de vezes especificada
+MoverCursor(direcao, passos) {
+    ; Verifica se a direção é "direita" ou "esquerda"
+    if (direcao = "direita") {
+        ; Envia "Send, {Right}" o número de vezes especificado em passos
+        Loop, %passos% {
+            Send, {Right}
+        }
+    }
+    else if (direcao = "esquerda") {
+        ; Envia "Send, {Left}" o número de vezes especificado em passos
+        Loop, %passos% {
+            Send, {Left}
+        }
+    }
+    else {
+        MsgBox, Direção inválida. Use "direita" ou "esquerda".
+    }
+}
+
+; Exemplo de uso
+MoverCursor("direita", 5) ; Move 5 passos para a direita
+MoverCursor("esquerda", 3) ; Move 3 passos para a esquerda
+
+
+F1::
+; Salvar a linha inteira
+Send, {Right}
+Send, GetDataHoje()
+Send, {Right}
+SendRaw, não adquirido
+Send, {Right}
+SendRaw, não se aplica
+Send, {Right}
+SendRaw, não se aplica
+Send, {Right}
+SendRaw, não se aplica
+Send, {Ctrl down}
+Send, {Left}
+Send, {Left}
+Send, {Left}
+Send, {Left}
+Send, {Left}
+Send, {Left}
+Send, {Left}
+Send, {Left}
+Send, {Ctrl up}
+Send, ^c
+
+

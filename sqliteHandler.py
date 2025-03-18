@@ -11,20 +11,16 @@ comando  =  sys.argv[1].lower()  if  len(sys.argv)  >  1  else  ""
 
 def salvar_chamada( numero , data_hora = None):
     """Salva uma chamada no banco de dados"""
-    if data_hora:
-        data_hora_norm = normalizar_data(data_hora, modo = 'entradaNoBanco')
-        if not data_hora_norm:
-            print("❌ Data inválida. Use o formato: AAAA-MM-DD HH:MM:SS a sua data foi:", data_hora)
-            return
+    if data_hora_norm := normalizar_data(data_hora, 'entradaNoBanco'):
         data_hora = data_hora_norm
-
-    if not validar_numero(numero):
-        print("❌ Número inválido. Use o formato: 11987654321")
-        return
-    if not data_hora:
+    elif not data_hora:
         data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    elif not validar_data(data_hora):
-        print("❌ Data inválida. Use o formato: AAAA-MM-DD HH:MM:SS")
+    else:
+        print("❌ Data inválida. Use o formato: AAAA-MM-DD HH:MM:SS você passou: ", data_hora)
+        return
+    
+    if not validar_numero(numero):
+        print("❌ Número inválido. Use o formato: 11987654321 você passou: ", numero)
         return
     try:
         exec(f"INSERT INTO chamadas (numero, data_hora) VALUES ({numero}, '{data_hora}')")
@@ -83,11 +79,21 @@ if __name__ == "__main__":
             if sys.argv[2].isdigit():
                 print('cheguei na opcao de listar que deve vir um numero e o argumento é: ', sys.argv[2])
                 listar_chamadas(numero=sys.argv[2])
+            elif normalizar_data(sys.argv[2], ''):
+                #print('cheguei na opcao de listar que deve vir uma data e o argumento é: ', sys.argv[2])
+                data_norm = normalizar_data(sys.argv[2], '')
+                listar_chamadas(data=data_norm)
             else:
-                print('cheguei na opcao de listar que deve vir uma data e o argumento é: ', sys.argv[2])
-                listar_chamadas(data=sys.argv[2])
+                print("você passou argumento inválido para listar não é data válida nem número válido")
         elif len(sys.argv) == 4:
-            listar_chamadas(sys.argv[2], sys.argv[3])
+            if sys.argv[2].isdigit() and normalizar_data(sys.argv[3], ''):
+                listar_chamadas(sys.argv[2], normalizar_data(sys.argv[3]))
+            elif sys.argv[3].isdigit() and not normalizar_data(sys.argv[2], ''):
+                print('data inválida a data fornecida foi: ', sys.argv[2])
+            elif not sys.argv[2].isdigit() and normalizar_data(sys.argv[3], ''):
+                print('numero inválido o numero fornecido foi: ', sys.argv[2])
+            else:
+                print('numero e data inválidos o numero fornecido foi: ', sys.argv[2], ' e a data foi: ', sys.argv[3])
         else:
             print("📌 Uso: python sqliteHandler.py listar [numero] [data]")            
     
@@ -121,39 +127,33 @@ if __name__ == "__main__":
             print("📌 Uso: python sqliteHandler.py listar_linhas [telefone] [empresa]")
     # Fechar a conexão
     
- # def listar_chamadas(numero = '', data = ''):
-#     """Lista todas as chamadas ou apenas as de um número específico ou de uma data específica"""
-#     print(f"aqui estão as variaveis numero:  {numero} e data= '{data}'" )
-#     if data:
-#         data_norm = normalizar_data(data)
-#         if not data_norm:
-#             print("❌ Data inválida. Use o formato: AAAA-MM-DD HH:MM:SS, a data que voce enviou foi: ",data)
-#             return
-#         data  =  data_norm
-#     try:
-#         if numero and not data:
-#             chamadas  =  exec(f"SELECT * FROM chamadas WHERE numero = {numero}")
-#             print(f"Chamadas para o número {numero}:")
-#             for chamada in chamadas:
-#                 print(f"Data/Hora: {chamada[2]}")
-#             return
-#         elif data and not numero:
-#             chamadas  =  exec(f"SELECT * FROM chamadas WHERE data_hora LIKE '{data}%'" )
-#             print(f"Chamadas no dia {data}:")
-#             for chamada in chamadas:
-#                 print(f"Número: {chamada[1]}")
-#             return
-#         elif numero and data:
-#             chamadas  =  exec(f"SELECT * FROM chamadas WHERE numero = {numero} AND data_hora LIKE '{data}%'")
-#             print(f"Chamadas para o número {numero} no dia {data}:")
-#             for chamada in chamadas:
-#                 print(f"Data/Hora: {chamada[2]}")
-#             return
-#         elif not numero and not data:     
-#             chamadas  =  exec("SELECT * FROM chamadas")
-#             for chamada in chamadas:
-#                 print(f"Número: {chamada[1]} | Data/Hora: {chamada[2]}")
-#         if not chamadas:
-#             print("Nenhuma chamada encontrada")
-#     except sqlite3.Error as e:
-#         print(f"❌ Erro ao acessar o banco de dados: {e}")
+# Salvar uma chamada
+# python3 sqliteHandler.py salvar <numero> [data]
+# exemplo
+# python3 sqliteHandler.py salvar 11987654321
+# python3 sqliteHandler.py salvar 11987654321 '2021-07-01 12:00:00'
+# verificar se ja liguei para um número específico
+# python3 sqliteHandler.py ja_liguei <numero>
+# exemplo
+# python3 sqliteHandler.py ja_liguei 11987654321
+# Listar chamadas
+# python3 sqliteHandler.py listar [numero] [data]
+# exemplo
+# python3 sqliteHandler.py listar
+# python3 sqliteHandler.py listar 11987654321
+# python3 sqliteHandler.py listar 2021-07-01
+# Salvar uma linha
+# python3 sqliteHandler.py salvar_linha <lista_numero_1> <lista_numero_2> <nome_empresa> <resultado> 
+#  <emailObtidoEmLigacao> <dataPrimeiroEmail> <dataSegundoEmail> <dataTerceiroEmail>
+# exemplo
+# python3 sqliteHandler.py salvar_linha 11987654321 11987654322 'Empresa 1' 'Contato 1' 
+# '2021-07-01' '2021-07-02' '2021-07-03'
+# Listar linhas
+# python3 sqliteHandler.py listar_linhas [telefone] [empresa]
+# exemplo
+# python3 sqliteHandler.py listar_linhas
+# python3 sqliteHandler.py listar_linhas 11987654321
+# python3 sqliteHandler.py listar_linhas 'Empresa 1'
+# python3 sqliteHandler.py listar_linhas 11987654321 'Empresa 1'
+# Ajuda
+# python3 sqliteHandler.py ajuda
